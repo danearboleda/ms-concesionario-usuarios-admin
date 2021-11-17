@@ -26,7 +26,7 @@ export class RolUsuarioController {
     @repository(RolRepository) protected rolRepository: RolRepository,
   ) { }
 
-  @get('/rols/{id}/usuarios', {
+  @get('/rols/{_id}/usuarios', {
     responses: {
       '200': {
         description: 'Array of Rol has many Usuario',
@@ -39,13 +39,13 @@ export class RolUsuarioController {
     },
   })
   async find(
-    @param.path.number('id') id: number,
+    @param.path.string('_id') _id: string,
     @param.query.object('filter') filter?: Filter<Usuario>,
   ): Promise<Usuario[]> {
     return this.rolRepository.esta_asociado(_id).find(filter);
   }
 
-  @post('/rols/{id}/usuarios', {
+  @post('/rols/{_id}/usuarios', {
     responses: {
       '200': {
         description: 'Rol model instance',
@@ -54,7 +54,7 @@ export class RolUsuarioController {
     },
   })
   async create(
-    @param.path.number('id') id: typeof Rol.prototype._id,
+    @param.path.string('_id') _id: typeof Rol.prototype._id,
     @requestBody({
       content: {
         'application/json': {
@@ -65,9 +65,9 @@ export class RolUsuarioController {
           }),
         },
       },
-    }) usuario: Omit<Usuario, 'id'>,
+    }) usuario: Omit<Usuario, '_id'>,
   ): Promise<Usuario> {
-    return this.rolRepository.esta_asociado(id).create(usuario);
+    return this.rolRepository.esta_asociado(_id).create(usuario);
   }
 
   @patch('/rols/{id}/usuarios', {
@@ -79,7 +79,7 @@ export class RolUsuarioController {
     },
   })
   async patch(
-    @param.path.number('id') id: number,
+    @param.path.string('_id') _id: string,
     @requestBody({
       content: {
         'application/json': {
@@ -93,7 +93,7 @@ export class RolUsuarioController {
     return this.rolRepository.esta_asociado(_id).patch(usuario, where);
   }
 
-  @del('/rols/{id}/usuarios', {
+  @del('/rols/{_id}/usuarios', {
     responses: {
       '200': {
         description: 'Rol.Usuario DELETE success count',
@@ -102,9 +102,9 @@ export class RolUsuarioController {
     },
   })
   async delete(
-    @param.path.number('id') id: number,
+    @param.path.number('_id') _id: string,
     @param.query.object('where', getWhereSchemaFor(Usuario)) where?: Where<Usuario>,
   ): Promise<Count> {
-    return this.rolRepository.esta_asociado(id).delete(where);
+    return this.rolRepository.esta_asociado(_id).delete(where);
   }
 }

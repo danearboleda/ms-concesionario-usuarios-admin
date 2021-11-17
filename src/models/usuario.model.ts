@@ -4,11 +4,11 @@ import {Rol} from './rol.model';
 @model()
 export class Usuario extends Entity {
   @property({
-    type: 'number',
+    type: 'string',
     id: true,
     generated: true,
   })
-  _id?: number;
+  _id?: string;
 
   @property({
     type: 'string',
