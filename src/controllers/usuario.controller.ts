@@ -1,3 +1,4 @@
+import {service} from '@loopback/core';
 import {
   Count,
   CountSchema,
@@ -11,13 +12,16 @@ import {
   getModelSchemaRef, param, patch, post, put, requestBody,
   response
 } from '@loopback/rest';
-import {Usuario} from '../models';
+import {Credenciales, Usuario} from '../models';
 import {UsuarioRepository} from '../repositories';
+import {AdministradorDeClavesService} from '../services';
 
 export class UsuarioController {
   constructor(
     @repository(UsuarioRepository)
     public usuarioRepository: UsuarioRepository,
+    @service(AdministradorDeClavesService)
+    public servicioClaves: AdministradorDeClavesService,
   ) { }
 
   @post('/usuarios')
@@ -38,6 +42,11 @@ export class UsuarioController {
     })
     usuario: Omit<Usuario, '_id'>,
   ): Promise<Usuario> {
+    let clave = this.servicioClaves.GenerarClaveAleatoria();
+    console.log(clave);
+    let claveCifrada = this.servicioClaves.CifrarTexto(clave);
+    console.log(claveCifrada);
+    usuario.clave = claveCifrada;
     return this.usuarioRepository.create(usuario);
   }
 
@@ -140,5 +149,32 @@ export class UsuarioController {
   })
   async deleteById(@param.path.string('_id') _id: string): Promise<void> {
     await this.usuarioRepository.deleteById(_id);
+  }
+
+  /**
+   * Sección de seguridad
+   */
+
+  @post("/identificar-usuario", {
+    responses: {
+      '200': {
+        description: "Identificación de usuarios"
+      }
+    }
+  })
+  async identificar(
+    @requestBody() credenciales: Credenciales
+  ): Promise<Usuario | null> {
+    let usuario = await this.usuarioRepository.findOne({
+      where: {
+        correo: credenciales.usuario,
+        clave: credenciales.clave
+      }
+    });
+    if (usuario) {
+      //consumir MS de token y generar uno nuevo
+      //Se aignará ese token a la respuesta para el cliente
+    }
+    return usuario;
   }
 }
